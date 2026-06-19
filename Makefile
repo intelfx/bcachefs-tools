@@ -67,7 +67,7 @@ BCACHEFS_DKMS_FORWARD := BCACHEFS_DEBUG \
 # Vars persisted into the *local* build.vars across invocations - a
 # superset of BCACHEFS_DKMS_FORWARD that also covers MAKE_DEBUG, the
 # userspace-side debug switch (see below).
-BCACHEFS_LOCAL_PERSIST := MAKE_DEBUG $(BCACHEFS_DKMS_FORWARD)
+BCACHEFS_LOCAL_PERSIST := CARGO_PROFILE MAKE_DEBUG $(BCACHEFS_DKMS_FORWARD)
 
 # `make debug` is a convenience alias that sets:
 #   MAKE_DEBUG:        userspace `bcachefs` binary built with
@@ -90,6 +90,7 @@ ifeq ($(filter debug,$(MAKECMDGOALS)),debug)
     MAKE_DEBUG := 1
     BCACHEFS_DEBUG := 1
     BCACHEFS_TESTS := 1
+    CARGO_PROFILE := debug
 endif
 
 ifdef MAKE_DEBUG
@@ -135,7 +136,7 @@ endif
 
 override CARGO_ARGS+=${CARGO_TOOLCHAIN}
 CARGO=cargo $(CARGO_ARGS)
-CARGO_PROFILE=release
+CARGO_PROFILE ?= release
 # CARGO_PROFILE=debug
 
 ifeq ($(CARGO_PROFILE),debug)
