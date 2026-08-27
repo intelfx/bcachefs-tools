@@ -305,7 +305,7 @@ else
 # installing rust-src may be all this needs.
 bcachefs-vendor-rustc-min := 1.85.0
 bcachefs-vendor-rust-probe := $(shell RUSTC='$(RUSTC)' HOSTRUSTC='$(HOSTRUSTC)' \
-	BINDGEN='$(BINDGEN)' KERNEL_OBJ='$(objtree)'			\
+	BINDGEN='$(BINDGEN)' KERNEL_SRC='$(srctree)' KERNEL_OBJ='$(objtree)'	\
 	RUSTC_MIN=$(bcachefs-vendor-rustc-min)				\
 	$(CONFIG_SHELL) $(src)/scripts/rust-vendor-available.sh)
 
@@ -338,9 +338,9 @@ bch-rust-L := -L$(obj)/vrust
 bch-target-json := $(abspath $(obj))/vrust/target.json
 $(shell	mkdir -p '$(abspath $(obj))/vrust' &&				\
 	{ [ '$(abspath $(obj))/vrust/generate_rust_target' -nt		\
-	    '$(objtree)/scripts/generate_rust_target.rs' ] ||		\
+	    '$(srctree)/scripts/generate_rust_target.rs' ] ||		\
 	  $(HOSTRUSTC) --edition=2021 -Copt-level=0			\
-	    '$(objtree)/scripts/generate_rust_target.rs'		\
+	    '$(srctree)/scripts/generate_rust_target.rs'		\
 	    -o '$(abspath $(obj))/vrust/generate_rust_target'; } &&	\
 	'$(abspath $(obj))/vrust/generate_rust_target'			\
 	    < '$(objtree)/include/config/auto.conf' > '$(bch-target-json)')

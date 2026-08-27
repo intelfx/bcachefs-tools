@@ -18,7 +18,8 @@
 RUSTC=${RUSTC:-rustc}
 HOSTRUSTC=${HOSTRUSTC:-$RUSTC}
 BINDGEN=${BINDGEN:-bindgen}
-KERNEL_OBJ=${KERNEL_OBJ:-.}
+KERNEL_SRC=${KERNEL_SRC:-.}
+KERNEL_OBJ=${KERNEL_OBJ:-${KERNEL_SRC}}
 
 missing=
 
@@ -64,9 +65,9 @@ fi
 command -v "$BINDGEN" >/dev/null 2>&1 ||
 	miss "bindgen ($BINDGEN) not found"
 
-[ -r "$KERNEL_OBJ/scripts/generate_rust_target.rs" ] ||
-	miss "kernel tree has no scripts/generate_rust_target.rs"
+[ -r "$KERNEL_SRC/scripts/generate_rust_target.rs" ] ||
+	miss "kernel srctree has no scripts/generate_rust_target.rs"
 [ -r "$KERNEL_OBJ/include/generated/rustc_cfg" ] ||
-	miss "kernel tree has no include/generated/rustc_cfg"
+	miss "kernel objtree has no include/generated/rustc_cfg"
 
 printf '%s\n' "${missing:-y}" | tr -d '"\\$`'
