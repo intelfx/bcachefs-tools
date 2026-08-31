@@ -438,6 +438,7 @@ fn image_create_inner(
     src_path: &str,
     keep_alloc: bool,
     verbosity: u32,
+    force: bool,
 ) -> Result<()> {
     let src_dir = std::fs::File::open(src_path)?;
     let meta = src_dir.metadata()?;
@@ -453,6 +454,15 @@ fn image_create_inner(
 
     let mut devs = vec![dev_opts];
     let mut meta_dev = DevOpts::new(CString::new(metadata_path.as_str())?);
+
+    if force {
+        std::fs::remove_file(&primary_path)
+            .or_else(|e| if e.kind() == std::io::ErrorKind::NotFound { Ok(()) } else { Err(e) })
+            ?;
+        std::fs::remove_file(&metadata_path)
+            .or_else(|e| if e.kind() == std::io::ErrorKind::NotFound { Ok(()) } else { Err(e) })
+            ?;
+    }
 
     // Check temp file doesn't exist
     if std::path::Path::new(&metadata_path).exists() {
@@ -761,6 +771,7 @@ fn cmd_image_create(argv: Vec<String>) -> Result<()> {
     let mut format_version: Option<u32> = None;
     let mut superblock_size: u32 = SUPERBLOCK_SIZE_DEFAULT;
     let mut verbosity: u32 = 1;
+    let mut force = false;
 
     let mut dev_label: Option<String> = None;
     let mut dev_fs_size: u64 = 0;
@@ -863,7 +874,7 @@ fn cmd_image_create(argv: Vec<String>) -> Result<()> {
                     let val = take_opt_value(inline_val, &argv, &mut i, raw_name)?;
                     format_version = Some(version_parse(&val)?);
                 }
-                "force" => {}
+                "force" => force = true,
                 "quiet" => verbosity = 0,
                 "verbose" => verbosity = verbosity.saturating_add(1),
                 "help" => {
@@ -891,7 +902,7 @@ fn cmd_image_create(argv: Vec<String>) -> Result<()> {
                     uuid_bytes = Some(*u.as_bytes());
                 }
                 b'a' => keep_alloc = true,
-                b'f' => {}
+                b'f' => force = true,
                 b'q' => verbosity = 0,
                 b'v' => verbosity = verbosity.saturating_add(1),
                 b'h' => {
@@ -1000,6 +1011,7 @@ fn cmd_image_create(argv: Vec<String>) -> Result<()> {
         &source,
         keep_alloc,
         verbosity,
+        force,
     );
 
     fs_opt_strs.free();
